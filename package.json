@@ -1,5 +1,5 @@
 {
-  "name": "comments-api",
+  "name": "node-rest-api",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -13,7 +13,6 @@
     "express": "~4.15.2",
     "morgan": "~1.8.1",
     "mysql": "^2.5.5",
-    "pug": "~2.0.0-beta11",
-    "serve-favicon": "~2.4.2"
+    "pug": "~2.0.0-beta11"
   }
 }
