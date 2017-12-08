@@ -18,9 +18,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Routing
 var index = require('./routes/index');
 var users = require('./routes/users');
+var sessions = require('./routes/sessions');
 
 app.use('/', index);
 app.use('/users', users);
+app.use('/sessions', sessions);
 
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

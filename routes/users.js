@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const mysql = require('mysql');
-const uniqid = require('uniqid');
-const crypto = require('crypto');
 const fs = require("fs");
 
 require('dotenv').config();
@@ -12,11 +10,6 @@ function User(email, avatar_url) {
   this.avatar_url = avatar_url;
 }
 
-function Authenticated_User(user_id, token) {
-  this.user_id = user_id;
-  this.token = token;
-}
-
 var pool = mysql.createPool({
     host            : process.env.DB_HOST,
     user            : process.env.DB_USER,
@@ -24,15 +17,6 @@ var pool = mysql.createPool({
     database        : process.env.DB_NAME,
     connectionLimit : 10
 });
-
-function generateTokenFromCredentials(email, password) {
-  const secret = process.env.API_SECRET;
-  const token = crypto.createHmac('sha256', secret)
-                   .update(email+password)
-                   .digest('hex');
-
-  return token;
-}
 
 router.get('/:userId', function(request, response, next) {
   response.setHeader('Content-Type', 'application/json');
@@ -58,35 +42,10 @@ router.get('/:userId', function(request, response, next) {
               response.json({status: 200, user: new User(rows[0].email, rows[0].avatar_url)});
               connection.release();
           } else {
+            response.json({status: 401, message: "Unauthorized"});
             connection.release();
-            return response.json({status: 401, message: "Unauthorized"});
           }
       });
-    });
-});
-
-router.post('/sessions/new', function(request, response) {
-    response.setHeader('Content-Type', 'application/json');
-    var user_id = uniqid('bcg-');
-    var email = request.body.email;
-    var password = request.body.password;
-    var token = generateTokenFromCredentials(email, password);
-
-    pool.getConnection(function (error, connection) {
-        if (error) {
-            return response.status(500).send(error);
-        }
-
-        var query = 'INSERT INTO user(user_id, email, token) values(?, ?, ?)';
-        connection.query(query, [user_id, email, token] , function(error, body) {
-            if (error) {
-                connection.release();
-                return response.status(500).send(error);
-            }
-
-            response.json({status: 200, user: new Authenticated_User(user_id, token)});
-            connection.release();
-        });
     });
 });
 
@@ -142,7 +101,7 @@ router.post('/:userId/avatar', function(request, response) {
               connection.release();
               var image = new Buffer(avatar_base64_data, 'base64');
               fs.writeFileSync('avatars/' + user_id + '.png', image);
-              return response.json({status: 200, message: "Your avatar got updated!"});
+              return response.json({status: 200, avatar_url: avatar_url});
             }
         });
     });
