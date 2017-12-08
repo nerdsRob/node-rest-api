@@ -73,7 +73,7 @@ router.post('/:userId/avatar', function(request, response) {
     response.setHeader('Content-Type', 'application/json');
     var user_id = request.params.userId;
     var token = request.body.token;
-    var avatar_base64_data = request.body.avatar.replace(/^data:image\/\w+;base64,/, "");
+    var avatar_base64_data = request.body.avatar;
     var avatar_url = 'localhost:3000/users/avatar/' + user_id;
 
     if (!token) {
@@ -99,7 +99,8 @@ router.post('/:userId/avatar', function(request, response) {
               return response.json({status: 401, message: "Unauthorized"});
             } else {
               connection.release();
-              var image = new Buffer(avatar_base64_data, 'base64');
+              var stripped_image_content_type = avatar_base64_data.replace(/^data:image\/\w+;base64,/, "");
+              var image = new Buffer(stripped_image_content_type, 'base64');
               fs.writeFileSync('avatars/' + user_id + '.png', image);
               return response.json({status: 200, avatar_url: avatar_url});
             }
