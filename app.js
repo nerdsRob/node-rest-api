@@ -17,10 +17,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routing
 var index = require('./routes/index');
-var comments = require('./routes/comments');
+var users = require('./routes/users');
 
 app.use('/', index);
-app.use('/comments', comments);
+app.use('/users', users);
 
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
