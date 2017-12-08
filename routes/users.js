@@ -62,7 +62,7 @@ router.get('/avatar/:userId', function(request, response, next) {
 
   response.sendFile(avatar_file_name, options, function(error) {
     if (error) {
-      return response.status(404).send(error);
+      return response.json({status: 404, message: "Oops, your avatar could not be found"});
     } else {
       return response.status(200);
     }
