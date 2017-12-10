@@ -6,7 +6,7 @@ function Token_Generator() {
 }
 
 Token_Generator.prototype.unique_id = function() {
-  return uniqid('bcg-');
+  return uniqid('id-');
 };
 
 Token_Generator.prototype.token = function(email, password) {
