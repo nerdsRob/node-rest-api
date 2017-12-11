@@ -36,8 +36,8 @@ DB_Controller.prototype.create_user = function(request, response) {
               connection.release();
               return response.status(500).send(error);
           }
-
-          response.json({status: 200, user: new Authenticated_User(user_id, token)});
+          var auth_user = new Authenticated_User(user_id, token);
+          response.status(200).send(auth_user);
           connection.release();
       });
   });
@@ -64,7 +64,8 @@ DB_Controller.prototype.fetch_user = function(request, response) {
               return response.status(400).send(error);
           }
           if (rows.length > 0) {
-              response.json({status: 200, user: new User(rows[0].email, rows[0].avatar_url)});
+              var user = new User(rows[0].email, rows[0].avatar_url);
+              response.status(200).send(user);
               connection.release();
           } else {
             response.json({status: 401, message: "Unauthorized"});
@@ -96,10 +97,12 @@ DB_Controller.prototype.fetch_user_avatar = function (request, response) {
 
 DB_Controller.prototype.update_user_avatar = function(request, response) {
   response.setHeader('Content-Type', 'application/json');
+  response.setHeader('Cache-Control', 'public, max-age=120')
   var user_id = request.params.userId;
   var token = request.body.token;
+  var base_url = request.body.base_url
   var avatar_base64_data = request.body.avatar;
-  var avatar_url = 'localhost:3000/users/avatar/' + user_id;
+  var avatar_url = base_url + '/users/avatar/' + user_id;
 
   if (!token) {
     return response.json({status: 400, message: "Missing token parameter"});
@@ -127,7 +130,7 @@ DB_Controller.prototype.update_user_avatar = function(request, response) {
             var stripped_image_content_type = avatar_base64_data.replace(/^data:image\/\w+;base64,/, "");
             var image = new Buffer(stripped_image_content_type, 'base64');
             fs.writeFileSync('avatars/' + user_id + '.png', image);
-            return response.json({status: 200, avatar_url: avatar_url});
+            return response.json({avatar_url: avatar_url});
           }
       });
   });
