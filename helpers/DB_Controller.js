@@ -4,6 +4,7 @@ const mysql = require('mysql');
 const fs = require('fs');
 const Token_Generator = require('./Token_Generator.js');
 
+var gravatar = require('gravatar-api');
 var User = require('../models/User.js');
 var Authenticated_User = require('../models/Authenticated_User.js');
 
@@ -25,13 +26,20 @@ DB_Controller.prototype.create_user = function(request, response) {
   var user_id = this.token_generator.unique_id();
   var token = this.token_generator.token(email, password);
 
+  var gravatar_options = {
+    email: email,
+    parameters: { "size": "400" },
+    secure: true
+  }
+  var avatar = gravatar.imageUrl(gravatar_options);
+
   this.pool.getConnection(function (error, connection) {
       if (error) {
           return response.status(500).send(error);
       }
 
-      var query = 'INSERT INTO user(user_id, email, token) values(?, ?, ?)';
-      connection.query(query, [user_id, email, token] , function(error, body) {
+      var query = 'INSERT INTO user(user_id, email, token, avatar_url) values(?, ?, ?, ?)';
+      connection.query(query, [user_id, email, token, avatar] , function(error, body) {
           if (error) {
               connection.release();
               return response.status(500).send(error);
