@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const DB_Controller = require('../helpers/DB_Controller.js');
+const DatabaseController = require('../helpers/DatabaseController.js');
 
-var db_controller = new DB_Controller();
+var db_controller = new DatabaseController();
 
 router.get('/:userId', function(request, response, next) {
   db_controller.fetch_user(request, response);

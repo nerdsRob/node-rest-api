@@ -2,14 +2,14 @@ require('dotenv').config();
 
 const mysql = require('mysql');
 const fs = require('fs');
-const Token_Generator = require('./Token_Generator.js');
+const TokenGenerator = require('./TokenGenerator.js');
 
 var gravatar = require('gravatar-api');
 var User = require('../models/User.js');
-var Authenticated_User = require('../models/Authenticated_User.js');
+var AuthUser = require('../models/AuthUser.js');
 
-function DB_Controller() {
-  this.token_generator = new Token_Generator();
+function DatabaseController() {
+  this.token_generator = new TokenGenerator();
   this.pool = mysql.createPool({
       host            : process.env.DB_HOST,
       user            : process.env.DB_USER,
@@ -19,7 +19,7 @@ function DB_Controller() {
   });
 }
 
-DB_Controller.prototype.create_user = function(request, response) {
+DatabaseController.prototype.create_user = function(request, response) {
   response.setHeader('Content-Type', 'application/json');
   var email = request.body.email;
   var password = request.body.password;
@@ -44,14 +44,14 @@ DB_Controller.prototype.create_user = function(request, response) {
               connection.release();
               return response.status(500).send(error);
           }
-          var auth_user = new Authenticated_User(user_id, token);
+          var auth_user = new AuthUser(user_id, token);
           response.status(200).send(auth_user);
           connection.release();
       });
   });
 };
 
-DB_Controller.prototype.fetch_user = function(request, response) {
+DatabaseController.prototype.fetch_user = function(request, response) {
   response.setHeader('Content-Type', 'application/json');
   var user_id = request.params.userId;
   var token = request.headers['token'];
@@ -83,7 +83,7 @@ DB_Controller.prototype.fetch_user = function(request, response) {
     });
 };
 
-DB_Controller.prototype.fetch_user_avatar = function (request, response) {
+DatabaseController.prototype.fetch_user_avatar = function (request, response) {
   var avatar_file_name = request.params.userId + ".png";
   var options = {
     root: 'avatars/',
@@ -103,7 +103,7 @@ DB_Controller.prototype.fetch_user_avatar = function (request, response) {
   });
 };
 
-DB_Controller.prototype.update_user_avatar = function(request, response) {
+DatabaseController.prototype.update_user_avatar = function(request, response) {
   response.setHeader('Content-Type', 'application/json');
   response.setHeader('Cache-Control', 'public, max-age=120')
   var user_id = request.params.userId;
@@ -144,4 +144,4 @@ DB_Controller.prototype.update_user_avatar = function(request, response) {
   });
 };
 
-module.exports = DB_Controller;
+module.exports = DatabaseController;
